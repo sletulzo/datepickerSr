@@ -1,0 +1,187 @@
+input.date-pickersr {
+    text-transform: capitalize;
+}
+
+.date-picker-container {
+    width: 800px;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 4%), 0 3px 10px rgb(0 0 0 / 15%);
+    margin-top: 15px;
+    left: 0;
+    padding: 20px 32px;
+    border-radius: 32px;
+    overflow: hidden;
+    position: absolute;
+    background: #fff;
+    z-index: 1000;
+    display: none;
+}
+
+.date-picker-container.open {
+    display: block;
+}
+
+.date-picker-container .date-picker-container-body {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    transition: all 0.2s;
+}
+
+.date-picker-container .date-picker-arrow {
+    cursor: pointer;
+    background: #fff;
+    z-index: 1;
+    border-radius: 50%;
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s;
+}
+
+.date-picker-container .date-picker-arrow:hover {
+    background: #eee;
+}
+
+.date-picker-container .date-picker-arrow.left {
+    left: 30px;
+}   
+
+.date-picker-container .date-picker-arrow.right {
+    right: 30px;
+}
+
+.date-picker-container .date-picker-container-panel {
+    /* width: 50%; */
+    padding: 0px 25px;
+    flex: 0 0 50%;
+    display: none;
+}
+
+.date-picker-container .date-picker-container-panel.active {
+    display: block;
+}
+
+.date-picker-container .date-picker-container-panel .date-picker-container-panel-title {
+    margin-bottom: 15px;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+}
+
+.date-picker-container .flexibility-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.date-picker-container .flexibility-container .flexibility-item {
+    margin-left: 10px;
+    cursor: pointer;
+    text-align: center;
+    border: 1px solid rgb(221, 221, 221);
+    background-color: rgb(255, 255, 255);
+    outline: none;
+    color: rgb(34, 34, 34);
+    position: relative;
+    padding: 8px 12px;
+    min-height: 32px;
+    border-radius: 16px;
+    font-size: 12px;
+    line-height: 18px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.date-picker-container .flexibility-container .flexibility-item:hover {
+    border: 1px solid #333;
+}
+
+.date-picker-container .flexibility-container .flexibility-item.active {
+    border: 1px solid #333;
+    background: #333;
+    color: #fff;
+}
+
+.date-picker-container .date-picker-container-panel-days {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 500;
+    color: rgb(113, 113, 113);
+}
+
+.date-picker-container .date-picker-container-panel-days .item {
+    height: 47px;
+    flex: 0 0 14.28%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.date-picker-container .date-picker-container-panel-content {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.date-picker-container .date-picker-container-panel-content .item-date {
+    height: 45px;
+    flex: 0 0 14.28%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #333;
+    font-size: 14px;
+}
+
+.date-picker-container .date-picker-container-panel-content .item-date.disabled {
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.date-picker-container .date-picker-container-panel-content .item-date.empty {
+    pointer-events: none;
+}
+
+.date-picker-container .date-picker-container-panel-content .item-date:hover {
+    border: 1px solid #333;
+} 
+
+.date-picker-container .date-picker-container-panel-content .item-date.active {
+    background: #333;
+    color: #fff;
+}
+
+
+@media (max-width:992px){
+    .date-picker-container {
+        width: 420px;
+    }
+
+    .date-picker-container .date-picker-container-panel {
+        flex: 0 0 100%;
+        padding: 0px;
+    }
+
+    .date-picker-container .flexibility-container {
+        padding-top: 20px;
+        border-top: 1px solid #ddd;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+}
+
+@media (max-width:600px){
+    .date-picker-container {
+        width: 100%;
+    }
+}
+
