@@ -5,15 +5,16 @@ input.date-pickersr {
 .date-picker-container {
     width: 800px;
     box-shadow: 0 0 0 1px rgb(0 0 0 / 4%), 0 3px 10px rgb(0 0 0 / 15%);
-    margin-top: 15px;
+    margin-top: 45px;
     left: 0;
     padding: 20px 32px;
-    border-radius: 32px;
+    border-radius: 32px !important;
     overflow: hidden;
     position: absolute;
     background: #fff;
     z-index: 1000;
     display: none;
+    user-select: none;
 }
 
 .date-picker-container.open {
@@ -55,7 +56,6 @@ input.date-pickersr {
 }
 
 .date-picker-container .date-picker-container-panel {
-    /* width: 50%; */
     padding: 0px 25px;
     flex: 0 0 50%;
     display: none;
@@ -172,7 +172,7 @@ input.date-pickersr {
     }
 
     .date-picker-container .flexibility-container {
-        padding-top: 20px;
+        padding: 15px 0 20px 0;
         border-top: 1px solid #ddd;
         overflow-x: auto;
         flex-wrap: nowrap;

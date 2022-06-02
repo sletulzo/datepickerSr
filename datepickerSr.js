@@ -1,5 +1,4 @@
 var datepickerSr = null;
-var numberBody = 0;
 
 // Constructor
 $(function() {
@@ -65,6 +64,9 @@ function DatepickerSR(element) {
     var self = this;
     var min = element.attr('data-min');
     var max = element.attr('data-max');
+    var name = element.attr('data-name');
+    var flexibility = element.attr('data-flexibility');
+    var value = element.val();
     var parent = element.parent();
 
     var momentMin = moment(min);
@@ -72,18 +74,19 @@ function DatepickerSR(element) {
 
     this.construct = function() {
         var html = '<div class="date-picker-container">'
-            + ' <input type="hidden" name="_current_date" value="">'
-            + ' <input type="hidden" name="_flexibility" value="0">'
-            + this.htmlArrow()
+            + ' <input type="hidden" name="'+ name +'" value="'+ value +'">'
+            + ' <input type="hidden" name="flexibility" value="'+ flexibility +'">'
+            + this.htmlArrows()
             + this.htmlBody()
             + this.htmlFooter()
             + ' </div>';
 
         parent.append(html);
         this.displayPanels();
+        this.defaultValue();
     }
 
-    this.htmlArrow = function() {
+    this.htmlArrows = function() {
         return '<div class="date-picker-arrow left" data-direction="left">'
             + '<svg viewBox="0 0 18 18" role="presentation" aria-hidden="true" focusable="false" style="height: 10px; width: 10px; display: block; fill: currentcolor;"><path d="m13.7 16.29a1 1 0 1 1 -1.42 1.41l-8-8a1 1 0 0 1 0-1.41l8-8a1 1 0 1 1 1.42 1.41l-7.29 7.29z" fill-rule="evenodd"></path></svg>'
             + '</div>'
@@ -93,14 +96,14 @@ function DatepickerSR(element) {
     }
 
     this.htmlBody = function() {
-        var html = '<div class="date-picker-container-body" data-number="0">';
+        var html = '<div class="date-picker-container-body">';
 
         let diffInMonth = momentMax.diff(momentMin, 'months');
         for (let i = 0; i < diffInMonth; i++) {
             var date = momentMin.clone().add(i, 'M');
 
             html += '<div class="date-picker-container-panel">'
-                + '<div class="date-picker-container-panel-title">'+ date.format('MMM') +' '+ date.year() +'</div>'
+                + '<div class="date-picker-container-panel-title">'+ date.locale("fr").format('MMM') +' '+ date.year() +'</div>'
                 + this.panelDays()
                 + this.panelDates(date, i >= 1 ? false : true)
                 + '</div>';
@@ -166,7 +169,7 @@ function DatepickerSR(element) {
     this.choice = function(item) {
         var grandParent = element.parent();
         var parent = item.closest('.date-picker-container-panel-content');
-        var hiddenInput = grandParent.find('input[name="_current_date"]');
+        var hiddenInput = grandParent.find('input[name="'+ name +'"]');
         var year = parent.attr('data-year');
         var month = parent.attr('data-month');
         var day = item.attr('data-value');
@@ -185,7 +188,7 @@ function DatepickerSR(element) {
     this.flexibility = function(item) {
         var parent = element.parent();
         var value = item.attr('data-value');
-        var input = parent.find('input[name=_flexibility]');
+        var input = parent.find('input[name=flexibility]');
 
         // Visual actions
         var elements = parent.find('.flexibility-item');
@@ -196,16 +199,65 @@ function DatepickerSR(element) {
         input.val(value);
     }
 
-    this.displayPanels = function() {
+    // Display panel date according to screen width
+    this.displayPanels = function(panel) {
         var width = $(window).width();
         var parent = element.parent();
         var items = parent.find('.date-picker-container-panel');
 
         if (items.length > 0) {
             if (width <= 992) {
-                items.first().addClass('active');
+                if (panel != undefined) {
+                    items.removeClass('active');
+                    panel.addClass('active');
+                } else {
+                    items.first().addClass('active');
+                }
             } else {
-                parent.find('.date-picker-container-panel:lt(2)').addClass('active');
+                if (panel != undefined) {
+                    items.removeClass('active');
+                    panel.addClass('active');
+
+                    if (panel.next('.date-picker-container-panel').length > 0) {
+                        panel.next('.date-picker-container-panel').addClass('active');
+                    }
+                } else {
+                    parent.find('.date-picker-container-panel:lt(2)').addClass('active');
+                }
+            }
+        }
+    }
+
+    // Default value on load
+    this.defaultValue = function() {
+        var parent = element.parent();
+
+        // Default flexibility
+        if (flexibility != undefined && flexibility != '') {
+            var itemFlex = parent.find('.flexibility-item[data-value="'+ flexibility +'"]');
+            if (itemFlex.length > 0) {
+                parent.find('.flexibility-item').removeClass('active');
+                itemFlex.addClass('active');
+            }
+        }
+
+        // Default date
+        if (value != undefined && value != '') {
+            var valueDate = moment(value);
+            element.val(valueDate.locale("fr").format('dddd LL'))
+
+            // Select default on picker
+            var panel = parent.find('.date-picker-container-panel-content[data-year="'+ valueDate.year() +'"][data-month="'+ valueDate.format('MM') +'"]');
+
+            if (panel.length > 0) {
+                var panelParent = panel.closest('.date-picker-container-panel');
+                var day = valueDate.date();
+                var itemDate = panel.find('.item-date[data-value="'+ day +'"]');
+
+                if (itemDate.length > 0) {
+                    itemDate.addClass('active');
+                    this.displayPanels(panelParent);
+                }
             }
         }
     }
