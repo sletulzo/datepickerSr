@@ -160,6 +160,10 @@ input.date-pickersr {
     color: #fff;
 }
 
+.date-picker-container .date-picker-container-panel-content .item-date.flex-active {
+    background: #3333330d;
+}
+
 
 @media (max-width:992px){
     .date-picker-container {

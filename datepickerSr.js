@@ -16,10 +16,12 @@ function initDatepickerSr() {
 // Events
 $(document).on('click', '.date-picker-container .item-date', function() {
     datepickerSr.choice($(this));
+    datepickerSr.flexibilityDate();
 });
 
 $(document).on('click', '.flexibility-item', function() {
     datepickerSr.flexibility($(this));
+    datepickerSr.flexibilityDate();
 });
 
 $(document).on('focus', 'input.date-pickersr[type=text]', function(e) {
@@ -258,6 +260,33 @@ function DatepickerSR(element) {
                     itemDate.addClass('active');
                     this.displayPanels(panelParent);
                 }
+            }
+        }
+
+        this.flexibilityDate();
+    }
+
+    // Display flexibility on date
+    this.flexibilityDate = function() {
+        var parent = element.parent();
+        var container = parent.find('.date-picker-container');
+        var items = container.find('.item-date');
+
+        let date = container.find('input[name="'+ name +'"]').val();
+        let flexibility = container.find('input[name="flexibility"]').val();
+
+        // Remove all flexibilities item
+        items.removeClass('flex-active');
+
+        if (date != '' && flexibility != '') {
+            var active = container.find('.item-date.active');
+
+            if (active.length > 0) {
+                flexactiveNext = active.nextAll(':lt('+flexibility+')');
+                flexactiveNext.addClass('flex-active');
+                
+                flexactivePrev = active.prevAll(':lt('+flexibility+')');
+                flexactivePrev.addClass('flex-active');
             }
         }
     }
