@@ -2,13 +2,14 @@ var datepickerSr = null;
 
 // Constructor
 $(function() {
-    initDatepickerSr();
+    // initDatepickerSr();
 })
 
 function initDatepickerSr() {
     var inputSrPicker = $('input.date-pickersr[type=text]');
     if (inputSrPicker.length > 0) {
         datepickerSr = new DatepickerSR(inputSrPicker);
+        datepickerSr.destroy();
         datepickerSr.construct();
     }
 }
@@ -25,15 +26,22 @@ $(document).on('click', '.flexibility-item', function() {
 });
 
 $(document).on('focus', 'input.date-pickersr[type=text]', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
     var parent = $(this).parent();
     var container = parent.find('.date-picker-container');
     container.addClass('open');
 });
 
+$(document).on('click', '.date-picker-validate', function() {
+    datepickerSr.close();
+});
+
 $(document).click(function(event) { 
     var $target = $(event.target);
-    if(!$target.closest('.date-picker-container').length && !$target.hasClass('date-pickersr')) {
-        $('.date-picker-container').removeClass('open');
+    if(!$target.closest('.date-picker-container').length && !$target.hasClass('date-pickersr') && datepickerSr != undefined) {
+        datepickerSr.close();
     }
 });
 
@@ -67,6 +75,7 @@ function DatepickerSR(element) {
     var min = element.attr('data-min');
     var max = element.attr('data-max');
     var name = element.attr('data-name');
+    var type = element.attr('data-type') != undefined ? element.attr('data-type') : '';
     var flexibility = element.attr('data-flexibility');
     var value = element.val();
     var parent = element.parent();
@@ -75,9 +84,9 @@ function DatepickerSR(element) {
     var momentMax = moment(max);
 
     this.construct = function() {
-        var html = '<div class="date-picker-container">'
-            + ' <input type="hidden" name="'+ name +'" value="'+ value +'">'
-            + ' <input type="hidden" name="flexibility" value="'+ flexibility +'">'
+        var html = '<div class="date-picker-container '+ type +'">'
+            + ' <input type="hidden" class="no-search" name="'+ name +'" value="'+ value +'">'
+            + ' <input type="hidden" class="no-search" name="flexibility" value="'+ flexibility +'">'
             + this.htmlArrows()
             + this.htmlBody()
             + this.htmlFooter()
@@ -118,12 +127,14 @@ function DatepickerSR(element) {
 
     this.htmlFooter = function() {
         var html = '<div class="date-picker-container-footer">'
+            + '<div class="flexibility-item-title">Vous êtes flexible ?</div>'
             + '<div class="flexibility-container">'
-            + '<div class="flexibility-item active" data-value="0">Dates exactes</div>'
-            + '<div class="flexibility-item" data-value="1">+- 1 jour</div>'
-            + '<div class="flexibility-item" data-value="2">+- 2 jours</div>'
-            + '<div class="flexibility-item" data-value="3">+- 3 jours</div>'
-            + '<div class="flexibility-item" data-value="7">+- 7 jours</div>';
+            + '<div class="flexibility-item" data-value="1">± 1 jour</div>'
+            + '<div class="flexibility-item" data-value="2">± 2 jours</div>'
+            + '<div class="flexibility-item" data-value="3">± 3 jours</div>'
+            + '<div class="flexibility-item" data-value="7">± 7 jours</div>'
+            + '</div>'
+            + '<div class="date-picker-validate">Fermer</div>';
 
         return html;
     }
@@ -146,7 +157,7 @@ function DatepickerSR(element) {
         let min = date.format('D');
         let startOfMonth = date.clone().startOf('month');
         let endOfMonth = date.clone().endOf('month');
-        let dayStart = startOfMonth.day() == 0 ? 7 : startOfMonth.day(); 
+        let dayStart = startOfMonth.day() == 0 ? 7 : startOfMonth.day();
         let diff = endOfMonth.diff(startOfMonth, 'days') + 1;
 
         var html = '<div class="date-picker-container-panel-content" data-year="'+ date.year() +'" data-month="'+ date.format('MM') +'">';
@@ -177,28 +188,46 @@ function DatepickerSR(element) {
         var day = item.attr('data-value');
         var date = moment(year + '-' + month + '-' + day);
 
+
         // Visual actions
+        let flexibility = grandParent.find('input[name="flexibility"]').val();
         var elements = grandParent.find('.item-date');
+        var textFlexibility = flexibility > 0 ? '  ±' + flexibility : '';
         elements.removeClass('active');
         item.addClass('active');
 
         // Update values
-        element.val(date.locale("fr").format('dddd LL'));
+        element.val(date.locale("fr").format('dddd LL') + textFlexibility);
         hiddenInput.val(date.format('YYYY-MM-DD'));
+        hiddenInput.trigger('change');
     }
 
     this.flexibility = function(item) {
         var parent = element.parent();
         var value = item.attr('data-value');
         var input = parent.find('input[name=flexibility]');
+        let date = parent.find('input[name="'+ name +'"]').val();
 
         // Visual actions
         var elements = parent.find('.flexibility-item');
-        elements.removeClass('active');
-        item.addClass('active');
+
+        if (item.hasClass('active')) {
+            value = 0;
+            item.removeClass('active');
+        } else {
+            elements.removeClass('active');
+            item.addClass('active');
+        }
 
         // Update value
         input.val(value);
+        input.trigger('change');
+
+        if (date != '') {
+            var textFlexibility = value > 0 ? '  ±' + value : '';
+            date = moment(date);
+            element.val(date.locale("fr").format('dddd LL') + textFlexibility);
+        }
     }
 
     // Display panel date according to screen width
@@ -233,6 +262,8 @@ function DatepickerSR(element) {
     // Default value on load
     this.defaultValue = function() {
         var parent = element.parent();
+        var hiddenInput = parent.find('input[name="'+ name +'"]');
+        var textFlexibility = '';
 
         // Default flexibility
         if (flexibility != undefined && flexibility != '') {
@@ -240,26 +271,42 @@ function DatepickerSR(element) {
             if (itemFlex.length > 0) {
                 parent.find('.flexibility-item').removeClass('active');
                 itemFlex.addClass('active');
+                textFlexibility = '  ±' + flexibility;
             }
         }
 
         // Default date
         if (value != undefined && value != '') {
+            var isOnRange = true;
             var valueDate = moment(value);
-            element.val(valueDate.locale("fr").format('dddd LL'))
 
-            // Select default on picker
-            var panel = parent.find('.date-picker-container-panel-content[data-year="'+ valueDate.year() +'"][data-month="'+ valueDate.format('MM') +'"]');
+            if (momentMin && momentMin > valueDate) {
+                isOnRange = false;
+            }
 
-            if (panel.length > 0) {
-                var panelParent = panel.closest('.date-picker-container-panel');
-                var day = valueDate.date();
-                var itemDate = panel.find('.item-date[data-value="'+ day +'"]');
+            if (momentMax && momentMax < valueDate) {
+                isOnRange = false;
+            }
 
-                if (itemDate.length > 0) {
-                    itemDate.addClass('active');
-                    this.displayPanels(panelParent);
+            if (isOnRange) {
+                element.val(valueDate.locale("fr").format('dddd LL') + textFlexibility);
+
+                // Select default on picker
+                var panel = parent.find('.date-picker-container-panel-content[data-year="'+ valueDate.year() +'"][data-month="'+ valueDate.format('MM') +'"]');
+    
+                if (panel.length > 0) {
+                    var panelParent = panel.closest('.date-picker-container-panel');
+                    var day = valueDate.date();
+                    var itemDate = panel.find('.item-date[data-value="'+ day +'"]');
+    
+                    if (itemDate.length > 0) {
+                        itemDate.addClass('active');
+                        this.displayPanels(panelParent);
+                    }
                 }
+            } else {
+                element.attr('value', '');
+                hiddenInput.attr('value', '');
             }
         }
 
@@ -280,14 +327,48 @@ function DatepickerSR(element) {
 
         if (date != '' && flexibility != '') {
             var active = container.find('.item-date.active');
+            var panel = active.closest('.date-picker-container-panel');
 
             if (active.length > 0) {
-                flexactiveNext = active.nextAll(':lt('+flexibility+')');
+                flexactiveNext = active.nextAll(':not(.empty):not(.disabled):lt('+flexibility+')');
                 flexactiveNext.addClass('flex-active');
+                if (flexibility > flexactiveNext.length) {
+                    var nextPanel = panel.next('.date-picker-container-panel')
+                    if (nextPanel.length > 0) {
+                        var rest = flexibility - flexactiveNext.length;
+                        var flexactiveNext = nextPanel.find('.item-date:not(.empty):not(.disabled):lt('+ rest +')');
+                        flexactiveNext.addClass('flex-active');
+                    }
+                }
                 
-                flexactivePrev = active.prevAll(':lt('+flexibility+')');
+                flexactivePrev = active.prevAll(':not(.empty):not(.disabled):lt('+flexibility+')');
                 flexactivePrev.addClass('flex-active');
+                if (flexibility > flexactivePrev.length) {
+                    var prevPanel = panel.prev('.date-picker-container-panel')
+                    if (prevPanel.length > 0) {
+                        var rest = flexibility - flexactivePrev.length;
+                        var flexactivePrev = prevPanel.find('.item-date:not(.empty):not(.disabled)').slice(-rest);
+                        flexactivePrev.addClass('flex-active');
+                    }
+                }
             }
+        }
+    }
+
+    // Close 
+    this.close = function() {
+        var parent = element.parent();
+        var container = parent.find('.date-picker-container');
+        container.removeClass('open');
+    }
+
+    // Destroy
+    this.destroy = function() {
+        var parent = element.parent();
+        var container = parent.find('.date-picker-container');
+
+        if (container.length > 0) {
+            container.remove();
         }
     }
 }
