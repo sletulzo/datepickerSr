@@ -1,2 +1,2 @@
 # datepickerSr
-Date picker full JS 
+Date picker full JS using moment.js
